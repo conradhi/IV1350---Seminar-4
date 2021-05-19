@@ -7,6 +7,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.text.DecimalFormat;
 
 /**
@@ -16,6 +18,7 @@ public class Sale {
     private Total total;
     private HashMap<String, Quantity> quantityMap = new HashMap<>();
     private double payment = 0;
+    private List<SaleObserver> saleObservers = new ArrayList();
     
     private String pattern = "###,###.###";
     private DecimalFormat decimalFormat = new DecimalFormat(pattern);
@@ -69,6 +72,7 @@ public class Sale {
      */
     public void pay(double payment){
         this.payment = payment;
+        notifyObservers();
     }
 
     /**
@@ -131,7 +135,7 @@ public class Sale {
 
         while(entriesIterator.hasNext()) {
             Quantity quantity = getCurrentItem(entriesIterator);
-            builder.append(quantity.getItem().getName().toString());
+            builder.append(quantity.getItem().getName());
             addNewLine(builder, " Antal: " + quantity.getQuantity());
         }
 
@@ -156,5 +160,26 @@ public class Sale {
     private void addNewLine(StringBuilder builder, String line){
         builder.append(line);
         builder.append("\n");
+    }
+    
+     /**
+     * Adds a new observer to the current sale which will be notified when a payment is made
+     * 
+     * @param observer The observer that will be notified of a payment.
+     */
+     /**
+     * Registers observers. Any <code>Observer</code> that is passed to this method will be notified
+     * when this object changes state.
+     *
+     * @param observers The observer that shall be registered.
+     */
+    public void addObserver(List<SaleObserver> observers) {
+        saleObservers.addAll(observers);
+    }
+    
+    private void notifyObservers() {
+        for (SaleObserver observer : saleObservers) {
+            observer.completedPayment(payment);
+        }
     }
 }

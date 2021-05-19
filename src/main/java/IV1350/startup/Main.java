@@ -4,6 +4,7 @@ import IV1350.controller.Controller;
 import IV1350.integration.Printer;
 import IV1350.integration.SystemCreator;
 import IV1350.integration.Register;
+import IV1350.model.TotalRevenueFileOutput;
 import IV1350.view.View;
 
 /**
@@ -24,7 +25,7 @@ public class Main {
         Register register = new Register();
         Controller controller = new Controller(printer, register, systemCreator);
         View view = new View(controller);
-        
+
         view.sampleExecution();
 
     }

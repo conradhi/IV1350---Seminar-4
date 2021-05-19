@@ -28,16 +28,17 @@ public class Inventory {
      */
     public void updateInventory(Sale sale){
         HashMap<String, Quantity> items = sale.getItems();
-        Set entries = items.entrySet();
+        //Set entries = items.entrySet();
 
         for (HashMap.Entry<String, Quantity> set : items.entrySet()) {
-            Item item = getItem(set.getKey());
+            Item item = getItemToPay(set.getKey());
             int quantity = sale.getItemsQuantity(item);
 
 
             if (itemExists(set.getKey())) {
                 decreaseQuantity(item, quantity);
             }
+
         }
     }
 
@@ -48,12 +49,7 @@ public class Inventory {
      * @return True or false depending on if item was found or not
      */
     public boolean itemExists(String itemIdentifier){
-        if(inventory.containsKey(itemIdentifier)){
-            return true;
-        }
-        else{
-            return false;
-        }
+        return inventory.containsKey(itemIdentifier);
     }
 
     private void decreaseQuantity(Item item, int quantity){
@@ -68,8 +64,22 @@ public class Inventory {
      * 
      * @param itemIdentifier The string that identifies the {@Item}
      * @return The specified {@Item}
+     * @throws IV1350.integration.ItemNotFoundException
+     *         when an Item with ItemIdentifier can not be found in the inventory
+     * @throws IV1350.integration.ConnectionFailException
+     *         when connection to the inventory database fails
      */
-    public Item getItem(String itemIdentifier){
+    public Item getItem(String itemIdentifier)throws ConnectionFailException, ItemNotFoundException{
+        if("111".equals(itemIdentifier)) {
+            throw new ConnectionFailException("Could not connect to database");
+        }
+        if (itemExists(itemIdentifier)){
+            return inventory.get(itemIdentifier);
+        }
+        throw new ItemNotFoundException(itemIdentifier, "Could not find item with the identifier " + itemIdentifier + " in the inventory system");
+    }
+    
+    private Item getItemToPay(String itemIdentifier ){
         return inventory.get(itemIdentifier);
     }
 

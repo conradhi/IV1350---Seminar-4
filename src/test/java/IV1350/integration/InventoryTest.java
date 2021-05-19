@@ -47,8 +47,15 @@ public class InventoryTest {
         inventory.updateInventory(sale);
         Item itemExpected = new Item("1001", "Apple", 5, 99, 1.3);
         int expectedResult = itemExpected.getQuantityInStock();
-        int actualResult = inventory.getItem("1001").getQuantityInStock();
-        assertEquals("Inventory quantity has not been changed properly", expectedResult, actualResult);
+        try{
+            int actualResult = inventory.getItem("1001").getQuantityInStock();
+            assertEquals("Inventory quantity has not been changed properly", expectedResult, actualResult);
+        }catch (ItemNotFoundException exc){
+            fail("Item was not found in inventory");
+        }
+        catch (ConnectionFailException exc){
+            fail("No connection to inventory system");
+        }
     }
 
 }

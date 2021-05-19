@@ -3,20 +3,24 @@ package IV1350.controller;
 import IV1350.integration.*;
 import IV1350.model.Receipt;
 import IV1350.model.Sale;
+import IV1350.model.SaleObserver;
 
 import java.text.DecimalFormat;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * All calls to the program are passed through the controller. 
  * startNewSale() needs to be executed first for the program to work. 
  * pay() is the last method to be called as it will reset the sale class. 
  */
-public class Controller {
+public class Controller implements SaleObserver{
     private Accounting accounting;
     private Inventory inventory;
     private Printer printer;
     private Register register;
     private Sale sale;
+    private List<SaleObserver> saleObservers = new ArrayList<>();
 
     private String pattern = "###,###.###";
     private DecimalFormat decimalFormat = new DecimalFormat(pattern);
@@ -49,17 +53,16 @@ public class Controller {
      * @param itemIdentifier The string that identifies the item.
      * @return If the item exists a string containing item name, price, quantity, running total and 
      *         running total with tax will be printed. If the item does not exist, an error message is printed. 
+     * @throws IV1350.integration.ItemNotFoundException
+     *         when an Item with ItemIdentifier can not be found in the inventory
+     * @throws IV1350.integration.ConnectionFailException
+     *         when connection to the inventory database fails
      */
-    public String registerItem(String itemIdentifier){
-        if (itemExists(itemIdentifier)){
+    public String registerItem(String itemIdentifier) throws ItemNotFoundException, ConnectionFailException {
             Item item = inventory.getItem(itemIdentifier);
             sale.updateSale(item);
             return "Namn: " + item.getName() + "     Pris: " + item.getPrice() + "kr    Antal: " + sale.getSaleQuantity(itemIdentifier) + "     Totalt: " 
             + sale.getTotal().getTotal() + "kr     Med moms: " + getTotalWithTax() + "kr";
-        }
-        else{
-            return "Item not found";
-        }
     }
 
     /**
@@ -69,7 +72,7 @@ public class Controller {
      */
     public String endSale(){
         String moms = calculateMoms();
-        return "\n" + "Att betala: " + getTotalWithTax() + "kr      Varav moms: " + moms + "kr" ;
+        return "\n" + "Att betala:" + getTotalWithTax() + "kr      Varav moms: " + moms + "kr";
     }
 
     /**
@@ -80,18 +83,14 @@ public class Controller {
      * @param payment The amount of money that the customer pays.
      */
     public void pay(double payment){
+        sale.addObserver(saleObservers);
         sale.pay(payment);
-        double change = sale.getPayment() - getTotalWithTax();
         accounting.bookKeep(sale);
         inventory.updateInventory(sale);
         Receipt receipt = new Receipt(sale);
         printer.printReceipt(receipt);
         register.addPayment(payment);
         sale = null;
-    }
-
-    private boolean itemExists(String itemIdentifier){
-        return inventory.itemExists(itemIdentifier);
     }
 
     private String calculateMoms(){
@@ -102,5 +101,20 @@ public class Controller {
     private double getTotalWithTax(){
         return sale.getTotal().getTotalWithTax();
     }
+    
+     /**
+     * The specified observer will be notified of the total when a payment have been made.
+     * There will only be notifications after this method is called
+     *
+     * @param saleObserver The observer to notify.
+     */
+    public void addSaleObserver(SaleObserver saleObserver){
+        saleObservers.add(saleObserver);
+    }
 
+    @Override
+    public void completedPayment(double amount) {
+        
+    }
+    
 }
