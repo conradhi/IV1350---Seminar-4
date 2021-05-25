@@ -35,6 +35,11 @@ public class TotalRevenueFileOutput implements Logger, SaleObserver {
         logStream.println("Current revenue in register: " + revenue + "SEK");
     }
 
+    /**
+     * Notifies observers of a completed payment with the amount.
+     * 
+     * @param amount The amount of the payment.
+     */
     @Override
     public void completedPayment(double amount) {
         revenue += amount;
