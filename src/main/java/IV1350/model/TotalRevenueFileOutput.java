@@ -8,13 +8,15 @@ import java.io.PrintWriter;
  * Prints log messages to a file. The log file will be in the current directory and will be called
  * log.txt.
  */
-public class TotalRevenueFileOutput implements Logger {
+public class TotalRevenueFileOutput implements Logger, SaleObserver {
     private PrintWriter logStream;
+    private double revenue;
 
     /**
      * Creates a new instance and also creates a new log file. An existing log file will be deleted.
      */
     public TotalRevenueFileOutput() {
+        revenue = 0.0;
         try {
             logStream = new PrintWriter(new FileWriter("log.txt"), true);
         } catch (IOException ioe) {
@@ -26,11 +28,17 @@ public class TotalRevenueFileOutput implements Logger {
     /**
      * Prints the specified string to the log file.
      *
-     * @param message The string that will be printed to the log file.
+     * @param revenue The amount of revenue that will be printed to the log file.
      */
     @Override
     public void log(double revenue) {
         logStream.println("Current revenue in register: " + revenue + "SEK");
+    }
+
+    @Override
+    public void completedPayment(double amount) {
+        revenue += amount;
+        log(revenue);
     }
 
 }

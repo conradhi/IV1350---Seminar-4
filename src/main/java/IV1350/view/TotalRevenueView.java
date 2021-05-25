@@ -11,16 +11,11 @@ import IV1350.model.SaleObserver;
  */
 public class TotalRevenueView implements SaleObserver {
     private double revenue;
-    private Logger logger;
     /**
      * Creates a new instance of TotalRevenueView.
      */
     public TotalRevenueView() {
        revenue = 0.0;
-    }
-    
-    public void setLogger(Logger logger) {
-        this.logger = logger;
     }
     
     /**
@@ -32,7 +27,6 @@ public class TotalRevenueView implements SaleObserver {
     public void completedPayment(double amount) {
         revenue += amount;
         printTotalRevenue();
-        logger.log(revenue);
     }
     
     private void printTotalRevenue() {

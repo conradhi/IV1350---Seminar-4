@@ -23,8 +23,9 @@ public class View {
     public View(Controller controller){
         this.controller = controller;
         TotalRevenueView totalRevenueView = new TotalRevenueView();
-        totalRevenueView.setLogger(new TotalRevenueFileOutput());
+        TotalRevenueFileOutput totalRevenueFileOutput = new TotalRevenueFileOutput();
         controller.addSaleObserver(totalRevenueView);
+        controller.addSaleObserver(totalRevenueFileOutput);
     }
 
     /**
